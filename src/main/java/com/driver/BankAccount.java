@@ -2,6 +2,8 @@ package com.driver;
 
 import java.util.Random;
 
+import static java.lang.Math.min;
+
 public class BankAccount {
 
     private String name;
@@ -45,12 +47,20 @@ public class BankAccount {
         if (sum < 0 || sum > digits * 9) {
             throw new AccountNumberCannotBeGeneratedException("Account Number can not be generated");
         }
+        int remaining = sum;
         String accNo = "";
+        for(int i = 0; i < digits; i++) {
+            int dig = min(9, remaining);
+            accNo += dig;
+            remaining -= dig;
+        }
+
+        accNo = "";
         Random random = new Random();
         int n;
         int remainingSum = sum;
         for (int i = 0; i < digits; i++) {
-            int max = Math.min(remainingSum + 1, 10);
+            int max = min(remainingSum + 1, 10);
             n = random.nextInt(max);
             accNo += String.valueOf(n);
             remainingSum -= n;
