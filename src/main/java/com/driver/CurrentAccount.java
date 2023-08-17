@@ -1,30 +1,15 @@
 package com.driver;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-
 public class CurrentAccount extends BankAccount{
     String tradeLicenseId; //consists of Uppercase English characters only
 
-    public static int minBalance = 5000;
-
     public CurrentAccount(String name, double balance, String tradeLicenseId) throws Exception {
         // minimum balance is 5000 by default. If balance is less than 5000, throw "Insufficient Balance" exception
-        super(name, balance, minBalance);
-        if (balance < minBalance) {
+        super(name, balance, 5000);
+        this.tradeLicenseId = tradeLicenseId;
+        if (balance < 5000) {
             throw new Exception("Insufficient Balance");
         }
-        this.tradeLicenseId = tradeLicenseId;
-    }
-
-    public String getTradeLicenseId() {
-        return tradeLicenseId;
-    }
-
-    public void setTradeLicenseId(String tradeLicenseId) {
-        this.tradeLicenseId = tradeLicenseId;
     }
 
     public void validateLicenseId() throws Exception {
@@ -32,51 +17,83 @@ public class CurrentAccount extends BankAccount{
         // If the license Id is valid, do nothing
         // If the characters of the license Id can be rearranged to create any valid license Id
         // If it is not possible, throw "Valid License can not be generated" Exception
-        if (!tradeLicenseId.equals(tradeLicenseId.toUpperCase())) {
-            throw new Exception("Valid License can not be generated");
-        }
-
-        int size = tradeLicenseId.length();
-        HashMap<Character, Integer> map = new HashMap<>();
-        getFrequencyMap(size, map);
-
-        // odd even
-        if (Collections.max(map.values()) > size / 2) {
-            throw new Exception("Valid License can not be generated");
-        }
-
-        while (!isValidTradeId()) {
-            List list = Arrays.asList(tradeLicenseId.toCharArray());
-            Collections.shuffle(list);
-            // update your tradeLicenseId
-        }
-        this.tradeLicenseId = tradeLicenseId;
-        return;
-    }
-
-    private void getFrequencyMap(int size, HashMap<Character, Integer> map) {
-        for (int i = 0; i < size; i++) {
-            if (map.containsKey(tradeLicenseId.charAt(i))) {
-                int value = map.get(tradeLicenseId.charAt(i));
-                map.put(tradeLicenseId.charAt(i), value + 1);
+        if (!isNumberValid(tradeLicenseId)) {
+            String rearrangeId = arrangeString(tradeLicenseId);
+            if (rearrangeId == "") {
+                throw new Exception("Valid License can not be generated");
             }
             else {
-                map.put(tradeLicenseId.charAt(i), 1);
+                this.tradeLicenseId = tradeLicenseId;
             }
         }
     }
 
-    private boolean isValidTradeId() {
-        int size = tradeLicenseId.length();
-        for (int i = 0, j = 1; i < size && j < size; i++, j++) {
-            if (((Character)tradeLicenseId.charAt(i)).equals((Character) tradeLicenseId.charAt(i))) {
-                break;
-            }
-            if (j == size - 1) {
-                return true;
+    public char getCountChar(int[] count) {
+        int max = 0;
+        char ch = 0;
+        for (int i = 0; i < 26; i++) {
+            if (count[i] > max) {
+                max = count[i];
+                ch = (char)((int)'A' + i);
             }
         }
-        return false;
+        return ch;
     }
 
+    public String arrangeString(String s) {
+        int n = s.length();
+
+        // step 1: store frequency of each char
+        int[] freq = new int[26];
+        for(int i = 0; i < n; i++) {
+            char ch = s.charAt(i);
+            freq[ch - 'a']++;
+        }
+
+        // step 2: find char with max frequency
+        int max = 0, letter = 0;
+        for(int i = 0; i < 26; i++) {
+            if(freq[i] > max) {
+                max = freq[i];
+                letter = i;
+            }
+        }
+        if(max > (n + 1) / 2) return "";    // edge case
+
+        // step 3: put max char at the even position
+        char[] res = new char[n];
+        int index = 0;
+        while(freq[letter] > 0) {
+            res[index] = (char) (letter + 'a');
+            index += 2;
+            freq[letter]--;
+        }
+
+        // step 4: put rest of the elements
+        for(int i = 0; i < 26; i++) {
+            while(freq[i] > 0) {
+                if(index >= res.length) {
+                    index = 1;
+                }
+                res[index] = (char)(i + 'a');
+                index += 2;
+                freq[i]--;
+            }
+        }
+
+        return String.valueOf(res);
+    }
+
+    public boolean isNumberValid(String licenseId) {
+        for (int i = 0; i < licenseId.length() - 1; i++) {
+            if (licenseId.charAt(i) == licenseId.charAt(i + 1)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public String getTradeLicenseId() {
+        return tradeLicenseId;
+    }
 }

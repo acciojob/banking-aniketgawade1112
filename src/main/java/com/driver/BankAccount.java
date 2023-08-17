@@ -1,9 +1,5 @@
 package com.driver;
 
-import java.util.Random;
-
-import static java.lang.Math.min;
-
 public class BankAccount {
 
     private String name;
@@ -16,69 +12,50 @@ public class BankAccount {
         this.minBalance = minBalance;
     }
 
+    public String generateAccountNumber(int digits, int sum) throws Exception{
+        //Each digit of an account number can lie between 0 and 9 (both inclusive)
+        //Generate account number having given number of 'digits' such that the sum of digits is equal to 'sum'
+        //If it is not possible, throw "Account Number can not be generated" exception
+        if (digits * 9  < sum) {
+            throw new Exception("Account Number can not be generated");
+        }
+        String accountNumber = "";
+        while (sum > 9) {
+            accountNumber += '9';
+            sum -= 9;
+        }
+        accountNumber += (sum + "");
+        while (accountNumber.length() < digits) {
+            accountNumber += '0';
+        }
+        return accountNumber;
+    }
+
+    public void deposit(double amount) {
+        //add amount to balance
+        balance += amount;
+    }
+
+    public void withdraw(double amount) throws Exception {
+        // Remember to throw "Insufficient Balance" exception,
+        // if the remaining amount would be less than minimum balance
+        if ( (balance - amount) >= minBalance) {
+            balance -= amount;
+        }
+        else {
+            throw new Exception("Insufficient Balance");
+        }
+    }
+
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public double getBalance() {
-        return balance;
-    }
-
-    public void setBalance(double balance) {
-        this.balance = balance;
     }
 
     public double getMinBalance() {
         return minBalance;
     }
 
-    public void setMinBalance(double minBalance) {
-        this.minBalance = minBalance;
+    public double getBalance() {
+        return balance;
     }
-
-    public String generateAccountNumber(int digits, int sum) throws Exception{
-        //Each digit of an account number can lie between 0 and 9 (both inclusive)
-        //Generate account number having given number of 'digits' such that the sum of digits is equal to 'sum'
-        //If it is not possible, throw "Account Number can not be generated" exception
-        if (sum < 0 || sum > digits * 9) {
-            throw new AccountNumberCannotBeGeneratedException("Account Number can not be generated");
-        }
-        int remaining = sum;
-        String accNo = "";
-        for(int i = 0; i < digits; i++) {
-            int dig = min(9, remaining);
-            accNo += dig;
-            remaining -= dig;
-        }
-
-        accNo = "";
-        Random random = new Random();
-        int n;
-        int remainingSum = sum;
-        for (int i = 0; i < digits; i++) {
-            int max = min(remainingSum + 1, 10);
-            n = random.nextInt(max);
-            accNo += String.valueOf(n);
-            remainingSum -= n;
-        }
-        return accNo;
-    }
-
-    public void deposit(double amount) {
-        //add amount to balance
-        this.balance += amount;
-    }
-
-    public void withdraw(double amount) throws Exception {
-        // Remember to throw "Insufficient Balance" exception, if the remaining amount would be less than minimum balance
-        if (this.balance - amount < this.minBalance) {
-            throw new Exception("Insufficient Balance");
-        }
-        this.balance -= amount;
-    }
-
 }
